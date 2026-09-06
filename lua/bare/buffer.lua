@@ -84,7 +84,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
 })
 
 vim.api.nvim_create_autocmd(
-  { "BufAdd", "BufDelete", "BufEnter", "BufModifiedSet", "WinEnter", },
+  { "BufAdd", "BufDelete", "BufEnter", "WinEnter", },
   { callback = update }
 )
 update()

@@ -4,7 +4,6 @@ require("bare.options")
 require("bare.autocmd")
 require("bare.keymaps")
 require("bare.notify").setup()
-require("bare.netrw")
 
 vim.schedule(function()
   require("bare.buffer")
@@ -12,6 +11,8 @@ vim.schedule(function()
   require("bare.git").setup()
   require("bare.pairs").setup()
   require("bare.cmp")
+
+  require("bare.treesitter").setup()
 
   require("bare.fzf").setup()
   require("bare.files").setup()

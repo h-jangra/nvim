@@ -93,10 +93,12 @@ local function diagnostics()
   return table.concat(out, " ")
 end
 
-local function search()
-  if vim.v.hlsearch ~= 1 or f.getreg("/") == "" then return "" end
-  local ok, r = pcall(f.searchcount, { maxcount = 999, timeout = 30 })
-  return ok and r.total > 0 and r.current .. "/" .. r.total or ""
+local function multicursor()
+  local ok, mc = pcall(require, "bare.multicursor")
+  if ok and mc.has_cursors() then
+    return "%#StlDiagWarn#MC:" .. mc.count() .. "%#StlBase#"
+  end
+  return ""
 end
 
 function M.statusline()
@@ -111,6 +113,9 @@ function M.statusline()
     mh .. " " .. mode .. " %#StlBase#", (vim.bo.modified and "%#StlModified#" or "%#StlBase#") .. file
   }
 
+  local mc_str = multicursor()
+  if mc_str ~= "" then left[#left + 1] = mc_str end
+
   local g = git()
   if g ~= "" then left[#left + 1] = "%#StlGitBranch#" .. g end
 
@@ -118,12 +123,6 @@ function M.statusline()
   if d ~= "" then left[#left + 1] = d end
 
   local right = {}
-  local rec = f.reg_recording()
-  if rec ~= "" then right[#right + 1] = "%#StlDiagWarn# " .. rec end
-
-  local s = search()
-  if s ~= "" then right[#right + 1] = "%#StlBase# " .. s end
-
   local l = lsp()
   if l ~= "" then right[#right + 1] = "%#StlLsp# " .. l end
 
