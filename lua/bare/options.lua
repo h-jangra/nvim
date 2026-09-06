@@ -1,19 +1,28 @@
 local opt = vim.opt
 
-opt.cmdheight = 0
+opt.cmdheight = 1
 opt.laststatus = 3
 opt.mouse = "a"
 opt.number = true
 opt.relativenumber = true
 opt.scrolloff = 8
+opt.scrolloffpad = 8 -- 0.13: Keep cursor centered at end of buffer
 opt.showtabline = 0
 opt.signcolumn = "yes:1"
 opt.termguicolors = true
 opt.wrap = true
 
-opt.shortmess:append("IcFsW")
-opt.completeopt = { "menu", "menuone", "noselect" }
+opt.shortmess:append("IcFsWu")                                   -- 0.13: 'u' silences undo/redo messages
+opt.completeopt = { "menu", "menuone", "noselect", "preselect" } -- 0.13: LSP preselect
+opt.previewpopup = "height:12,width:60,border:rounded"           -- 0.13: Floating preview window options
 opt.winborder = "rounded"
+
+-- Treesitter & LSP native folding (0.13)
+vim.o.foldmethod = "expr"
+vim.o.foldexpr = function() return vim.treesitter.foldexpr() end
+vim.o.foldtext = function() return vim.lsp.foldtext() end -- 0.13: LSP highlighted fold text
+vim.o.foldenable = false
+vim.o.foldlevel = 99
 
 opt.expandtab = true
 opt.shiftwidth = 2
@@ -23,7 +32,7 @@ opt.tabstop = 2
 
 opt.incsearch = true
 
-opt.autoread = true
+opt.autoread = true -- 0.13: Real-time file change detection via libuv filesystem watchers
 opt.backup = false
 opt.swapfile = false
 opt.backupcopy = "yes"

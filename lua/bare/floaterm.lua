@@ -32,6 +32,7 @@ function M.open(cmd, title)
 	})
 
 	M.state.win = win
+	vim.wo[win].winpinned = true -- 0.13: Prevent window from closing unintentionally
 	if is_new then
 		vim.keymap.set("t", "<Esc>", "<C-\\><C-n>:Floaterm<CR>", { buffer = M.state.buf, silent = true })
 		vim.fn.termopen(is_cmd and cmd or vim.o.shell)

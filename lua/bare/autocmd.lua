@@ -1,7 +1,7 @@
--- Highlight on yank
-vim.api.nvim_create_autocmd("TextYankPost", {
+-- Highlight on yank and put (0.13: vim.hl.hl_op replaces deprecated on_yank)
+vim.api.nvim_create_autocmd({ "TextYankPost", "TextPutPost" }, {
   callback = function()
-    vim.hl.on_yank({ higroup = "Visual", timeout = 150 })
+    vim.hl.hl_op({ higroup = "Visual", timeout = 150 })
   end,
 })
 
@@ -35,3 +35,4 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "<CR>", "<CR><cmd>pcall(vim.cmd, 'cclose')<cr><cmd>pcall(vim.cmd, 'lclose')<cr>", opts)
   end,
 })
+

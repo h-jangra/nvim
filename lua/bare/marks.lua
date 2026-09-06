@@ -154,7 +154,7 @@ show_marks = function()
 end
 
 function M.setup()
-	vim.api.nvim_create_autocmd({ "CursorHold", "BufEnter", "BufWritePost" }, {
+	vim.api.nvim_create_autocmd({ "CursorHold", "BufEnter", "BufWritePost", "MarkSet" }, {
 		callback = update_signs,
 	})
 	vim.schedule(update_signs)

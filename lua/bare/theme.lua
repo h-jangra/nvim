@@ -96,8 +96,15 @@ function M.setup(opts)
     NonText = { fg = colors.crust },
     NormalFloat = { fg = colors.text, bg = bg_base },
     FloatBorder = { fg = colors.blue, bg = bg_base },
+    FloatTitle = { fg = colors.blue, bold = true },
+    FloatFooter = { fg = colors.overlay1, italic = true },
     NotifyFloat = { fg = colors.text, bg = colors.mantle },
     NotifyFloatBorder = { fg = colors.blue, bg = colors.mantle },
+
+    -- 0.13 Native Dimmed & Multiple Cursors
+    Dimmed = { fg = colors.surface2 },
+    MultiCursor = { fg = colors.base, bg = colors.peach },
+    MultiCursorMain = { fg = colors.base, bg = colors.teal, bold = true },
 
     -- Status line and tabs
     StatusLine = { fg = colors.text, bg = bg_mantle },
@@ -148,7 +155,6 @@ function M.setup(opts)
     diffRemoved = { fg = colors.red },
 
     WinSeparator = { fg = colors.surface1 },
-    FloatTitle = { fg = colors.blue, bold = true },
   }
 
   for group, hl_opts in pairs(highlights) do

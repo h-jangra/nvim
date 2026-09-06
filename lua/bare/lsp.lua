@@ -121,6 +121,10 @@ capabilities.textDocument.completion.completionItem = {
   insertTextModeSupport = { valueSet = { 1, 2 } },
   resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } },
 }
+capabilities.textDocument.foldingRange = {
+  dynamicRegistration = false,
+  lineFoldingOnly = true,
+}
 
 local root_markers = {
   ".git", "pom.xml", "build.gradle", "mvnw", "gradlew", "package.json", "Cargo.toml",
@@ -210,7 +214,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
     organize_imports(buf, organise_imports_client[ft])
     vim.lsp.buf.format({
-      bufnr = b,
+      bufnr = buf,
       filter = function(cl)
         return not ft_formatter[ft] or cl.name == ft_formatter[ft]
       end,
