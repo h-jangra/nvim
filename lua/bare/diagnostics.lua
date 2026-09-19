@@ -6,25 +6,76 @@ local function open(cmd, list, msg)
   end
   vim.cmd(cmd)
 end
+
 function M.workspace()
-  vim.diagnostic.setqflist()
-  open("copen", vim.fn.getqflist, "No diagnostics")
+  vim.diagnostic.setqflist({ open = false })
+  open("copen", vim.fn.getqflist, "No workspace diagnostics")
 end
+M.picker_workspace = M.workspace
 
 function M.buffer()
-  vim.diagnostic.setloclist()
-  open("lopen", function()
-    return vim.fn.getloclist(0)
-  end, "No diagnostics")
+  local items = vim.diagnostic.toqflist(vim.diagnostic.get(0))
+  vim.fn.setqflist(items, "r")
+  vim.fn.setqflist({}, "a", { title = "Diagnostics: " .. (vim.fs.basename(vim.api.nvim_buf_get_name(0)) or "Current Buffer") })
+  open("copen", vim.fn.getqflist, "No buffer diagnostics")
 end
+M.picker_buffer = M.buffer
 
-function M.float()
+function M.open_float()
   vim.diagnostic.open_float({ border = "rounded" })
 end
+M.float = M.open_float
 
 function M.jump(count, severity)
   vim.diagnostic.jump({ count = count, float = true, severity = severity })
   vim.cmd("normal! zz")
+end
+
+function M.next_error()
+  M.jump(1, vim.diagnostic.severity.ERROR)
+end
+
+function M.prev_error()
+  M.jump(-1, vim.diagnostic.severity.ERROR)
+end
+
+function M.next_warn()
+  M.jump(1, vim.diagnostic.severity.WARN)
+end
+
+function M.prev_warn()
+  M.jump(-1, vim.diagnostic.severity.WARN)
+end
+
+function M.toggle()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+end
+
+function M.toggle_qf()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.fn.getwininfo(win)[1].quickfix == 1 and vim.fn.getwininfo(win)[1].loclist == 0 then
+      vim.cmd("cclose")
+      return
+    end
+  end
+  -- Populate with current buffer diagnostics only so it does not dump other buffers
+  local items = vim.diagnostic.toqflist(vim.diagnostic.get(0))
+  vim.fn.setqflist(items, "r")
+  vim.fn.setqflist({}, "a", { title = "Diagnostics: " .. (vim.fs.basename(vim.api.nvim_buf_get_name(0)) or "Current Buffer") })
+  open("copen", vim.fn.getqflist, "No diagnostics")
+end
+
+function M.toggle_loc()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.fn.getwininfo(win)[1].loclist == 1 then
+      vim.cmd("lclose")
+      return
+    end
+  end
+  vim.diagnostic.setloclist({ open = false })
+  open("lopen", function()
+    return vim.fn.getloclist(0)
+  end, "No diagnostics")
 end
 
 function M.copy_line()
@@ -50,18 +101,12 @@ function M.setup()
   })
 
   local map = vim.keymap.set
-  local error = vim.diagnostic.severity.ERROR
-  local warn = vim.diagnostic.severity.WARN
-
-  map("n", "<leader>dw", M.workspace, { desc = "Diagnostics" })
-  map("n", "<leader>db", M.buffer, { desc = "Buffer Diagnostics" })
-  map("n", "<leader>df", M.float, { desc = "Diagnostic Float" })
-  map("n", "<leader>dc", M.copy_line, { desc = "Copy Diagnostic" })
-
-  map("n", "]e", function() M.jump(1, error) end, { desc = "Next Error" })
-  map("n", "[e", function() M.jump(-1, error) end, { desc = "Prev Error" })
-  map("n", "]w", function() M.jump(1, warn) end, { desc = "Next Warning" })
-  map("n", "[w", function() M.jump(-1, warn) end, { desc = "Prev Warning" })
+  map("n", "]d", function() M.jump(1) end, { desc = "Next Diagnostic" })
+  map("n", "[d", function() M.jump(-1) end, { desc = "Prev Diagnostic" })
+  map("n", "]e", M.next_error, { desc = "Next Error" })
+  map("n", "[e", M.prev_error, { desc = "Prev Error" })
+  map("n", "]w", M.next_warn, { desc = "Next Warning" })
+  map("n", "[w", M.prev_warn, { desc = "Prev Warning" })
 end
 
 return M

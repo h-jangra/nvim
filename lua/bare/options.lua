@@ -13,14 +13,16 @@ opt.termguicolors = true
 opt.wrap = true
 
 opt.shortmess:append("IcFsWu")                                   -- 0.13: 'u' silences undo/redo messages
-opt.completeopt = { "menu", "menuone", "noselect", "preselect" } -- 0.13: LSP preselect
+opt.autocomplete = true
+opt.complete = { ".", "w" }
+opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" }
 opt.previewpopup = "height:12,width:60,border:rounded"           -- 0.13: Floating preview window options
 opt.winborder = "rounded"
 
 -- Treesitter & LSP native folding (0.13)
 vim.o.foldmethod = "expr"
-vim.o.foldexpr = function() return vim.treesitter.foldexpr() end
-vim.o.foldtext = function() return vim.lsp.foldtext() end -- 0.13: LSP highlighted fold text
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldtext = "v:lua.vim.lsp.foldtext()" -- 0.13: LSP highlighted fold text
 vim.o.foldenable = false
 vim.o.foldlevel = 99
 

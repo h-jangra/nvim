@@ -101,8 +101,8 @@ local servers = {
   nimls = { cmd = { "nimlangserver" }, ft = { "nim", "nimble" } },
 }
 
-local function on_attach(_, bufnr)
-  if vim.lsp.inlay_hint then
+local function on_attach(client, bufnr)
+  if client:supports_method("textDocument/inlayHint") and vim.lsp.inlay_hint then
     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
   end
   local map = function(m, l, r, desc)
@@ -131,58 +131,18 @@ local root_markers = {
   "go.mod", "pyproject.toml", "setup.py", "requirements.txt", ".venv", ".luarc.json", "stylua.toml",
 }
 
-local ft_to_servers = {}
 for name, cfg in pairs(servers) do
-  for _, ft in ipairs(cfg.ft) do
-    ft_to_servers[ft] = ft_to_servers[ft] or {}
-    table.insert(ft_to_servers[ft], name)
+  if vim.fn.executable(cfg.cmd[1]) == 1 then
+    vim.lsp.config[name] = {
+      cmd = cfg.cmd,
+      filetypes = cfg.ft,
+      root_markers = root_markers,
+      settings = cfg.settings,
+      capabilities = capabilities,
+      on_attach = on_attach,
+    }
+    vim.lsp.enable(name)
   end
-end
-
-local function start_lsp(bufnr)
-  local names = ft_to_servers[vim.bo[bufnr].filetype]
-  if not names then
-    return
-  end
-  for _, name in ipairs(names) do
-    local cfg = servers[name]
-    if vim.fn.executable(cfg.cmd[1]) == 1 then
-      vim.lsp.start({
-        name = name,
-        cmd = cfg.cmd,
-        root_dir = vim.fs.root(bufnr, root_markers),
-        settings = cfg.settings,
-        on_attach = on_attach,
-        capabilities = capabilities,
-        flags = { allow_incremental_sync = true },
-      }, { bufnr = bufnr })
-    end
-  end
-end
-
-local group = vim.api.nvim_create_augroup("LspConfig", { clear = true })
-
-if vim.lsp.config then
-  for name, cfg in pairs(servers) do
-    if vim.fn.executable(cfg.cmd[1]) == 1 then
-      vim.lsp.config[name] = {
-        cmd = cfg.cmd,
-        filetypes = cfg.ft,
-        root_markers = root_markers,
-        settings = cfg.settings,
-        capabilities = capabilities,
-        on_attach = on_attach,
-      }
-      vim.lsp.enable(name)
-    end
-  end
-else
-  vim.api.nvim_create_autocmd("FileType", {
-    group = group,
-    callback = function(a)
-      start_lsp(a.buf)
-    end,
-  })
 end
 
 local function organize_imports(buf, name)
@@ -205,6 +165,8 @@ local function organize_imports(buf, name)
     end
   end
 end
+
+local group = vim.api.nvim_create_augroup("LspConfig", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = group,

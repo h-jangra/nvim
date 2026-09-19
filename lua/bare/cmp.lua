@@ -1,8 +1,6 @@
+vim.opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" }
 vim.opt.pumheight = 10
-vim.opt.complete = { ".", "w", "b", "u" }
-vim.opt.completeopt = { "menuone", "noinsert", "noselect", "popup", "fuzzy", "nearest" }
 vim.opt.pumborder = "rounded"
--- vim.o.autocomplete      = true
 
 local icons = {
   Text = "󰉿",
@@ -43,42 +41,52 @@ end
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client and client:supports_method("textDocument/completion") then
-      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true, convert = format })
+    if not client:supports_method("textDocument/completion") then return end
+
+    local chars = client.server_capabilities.completionProvider.triggerCharacters or {}
+    for c in ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$@"):gmatch(".") do
+      if not vim.tbl_contains(chars, c) then table.insert(chars, c) end
     end
+
+    client.server_capabilities.completionProvider.triggerCharacters = chars
+    vim.lsp.completion.enable(true, client.id, args.buf, {
+      autotrigger = true,
+      convert = format,
+    })
   end,
 })
 
-if vim.lsp.inline_completion then
-  vim.lsp.inline_completion.enable(true)
-end
+vim.keymap.set("i", "<C-Space>", function()
+  if vim.fn.pumvisible() == 1 then return "<C-n>" end
+  if vim.lsp.get_clients({ bufnr = 0, method = "textDocument/completion" })[1] then
+    vim.lsp.completion.get()
+    return ""
+  end
+  return "<C-n>"
+end, { expr = true })
 
-vim.keymap.set("i", "<C-Space>", vim.lsp.inline_completion.get)
+vim.keymap.set("i", "<C-f>", "<C-x><C-f>")
 
 vim.keymap.set("i", "<Tab>", function()
   if vim.snippet.active({ direction = 1 }) then
     vim.snippet.jump(1)
-    return ""
   elseif vim.fn.pumvisible() == 1 then
     return "<C-n>"
   else
     return "<Tab>"
   end
-end, { expr = true, silent = true })
+end, { expr = true })
 
 vim.keymap.set("i", "<S-Tab>", function()
   if vim.snippet.active({ direction = -1 }) then
     vim.snippet.jump(-1)
-    return ""
   elseif vim.fn.pumvisible() == 1 then
     return "<C-p>"
   else
     return "<S-Tab>"
   end
-end, { expr = true, silent = true })
+end, { expr = true })
 
-vim.api.nvim_create_autocmd("InsertCharPre", {
-  callback = function()
-    vim.lsp.completion.get()
-  end,
-})
+vim.keymap.set("i", "<CR>", function()
+  return vim.fn.pumvisible() == 1 and "<C-y>" or "<CR>"
+end, { expr = true })
