@@ -93,14 +93,6 @@ local function diagnostics()
   return table.concat(out, " ")
 end
 
-local function multicursor()
-  local ok, mc = pcall(require, "bare.multicursor")
-  if ok and mc.has_cursors() then
-    return "%#StlDiagWarn#MC:" .. mc.count() .. "%#StlBase#"
-  end
-  return ""
-end
-
 function M.statusline()
   local raw = a.nvim_get_mode().mode
   local mode = modes[raw] or "N"
@@ -112,9 +104,6 @@ function M.statusline()
   local left = {
     mh .. " " .. mode .. " %#StlBase#", (vim.bo.modified and "%#StlModified#" or "%#StlBase#") .. file
   }
-
-  local mc_str = multicursor()
-  if mc_str ~= "" then left[#left + 1] = mc_str end
 
   local g = git()
   if g ~= "" then left[#left + 1] = "%#StlGitBranch#" .. g end

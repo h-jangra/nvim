@@ -200,14 +200,21 @@ local function render(query, maps)
     table.insert(hls, { i - 1, 1 + max_k + 2, #line, it.is_group and "Directory" or "Normal" })
   end
 
+  local width = 0
+  for _, l in ipairs(lines) do
+    width = math.max(width, vim.fn.strdisplaywidth(l))
+  end
+  width = math.min(width + 2, vim.o.columns - 4)
+
   local height = math.min(vim.o.lines - 4, #lines)
   local buf, win = ui.float({
     buf = state.buf,
     win = state.win,
     lines = lines,
+    width = width,
     height = height,
     row = math.max(1, vim.o.lines - height - 3),
-    col = math.max(1, vim.o.columns - 2),
+    col = math.max(1, vim.o.columns - width - 2),
     title = string.format(" %s ", format_title(query)),
     enter = false,
     focusable = false,

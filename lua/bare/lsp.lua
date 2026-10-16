@@ -5,17 +5,17 @@ local ft_formatter = {
   css = "cssls",
   scss = "cssls",
   less = "cssls",
-  javascript = "ts_ls",
-  javascriptreact = "ts_ls",
-  typescript = "ts_ls",
-  typescriptreact = "ts_ls",
+  javascript = "tsls",
+  javascriptreact = "tsls",
+  typescript = "tsls",
+  typescriptreact = "tsls",
 }
 
 local organise_imports_client = {
-  javascript = "ts_ls",
-  javascriptreact = "ts_ls",
-  typescript = "ts_ls",
-  typescriptreact = "ts_ls",
+  javascript = "tsls",
+  javascriptreact = "tsls",
+  typescript = "tsls",
+  typescriptreact = "tsls",
   java = "jdtls",
 }
 
@@ -99,6 +99,8 @@ local servers = {
   },
   qmlls = { cmd = { "qml-language-server" }, ft = { "qml" } },
   nimls = { cmd = { "nimlangserver" }, ft = { "nim", "nimble" } },
+  yml = { cmd = { "yaml-language-server", "--stdio" }, ft = { "yaml", "yml" } },
+  kotlin = { cmd = { "kotlin-lsp" }, ft = { "kotlin" } },
 }
 
 local function on_attach(client, bufnr)

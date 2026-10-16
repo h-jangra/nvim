@@ -1,4 +1,3 @@
-require("vim._core.ui2").enable({})
 require("bare.theme").setup()
 require("bare.options")
 require("bare.autocmd")
@@ -11,9 +10,8 @@ vim.schedule(function()
   require("bare.git").setup()
   require("bare.pairs").setup()
   require("bare.cmp")
-
+  require("bare.netrw")
   require("bare.treesitter").setup()
-
   require("bare.fzf").setup()
   require("bare.files").setup()
   require("bare.marks").setup()
@@ -26,5 +24,3 @@ vim.schedule(function()
   require("bare.img").setup()
   require("bare.present").setup()
 end)
-
-vim.keymap.set("n", "<leader>e", require("bare.filetree").toggle, { desc = "Toggle file explorer" })

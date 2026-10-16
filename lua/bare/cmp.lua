@@ -1,4 +1,3 @@
-vim.opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" }
 vim.opt.pumheight = 10
 vim.opt.pumborder = "rounded"
 

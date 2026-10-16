@@ -101,7 +101,7 @@ function M.setup(opts)
     NotifyFloat = { fg = colors.text, bg = colors.mantle },
     NotifyFloatBorder = { fg = colors.blue, bg = colors.mantle },
 
-    -- 0.13 Native Dimmed & Multiple Cursors
+    -- Dimmed & Multiple Cursors
     Dimmed = { fg = colors.surface2 },
     MultiCursor = { fg = colors.base, bg = colors.peach },
     MultiCursorMain = { fg = colors.base, bg = colors.teal, bold = true },

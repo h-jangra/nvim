@@ -1,5 +1,5 @@
 local map = vim.keymap.set
-local opts = { noremap = true, silent = true }
+local opts = { silent = true }
 
 map("n", "<Esc>", "<cmd>nohlsearch<cr>", opts)
 map("n", "<C-s>", "<cmd>silent write<cr>", opts)
@@ -8,6 +8,9 @@ map("n", "<A-q>", "<cmd>qall!<cr>", opts)
 map("n", "<leader>a", "ggVG", { desc = "Select All" })
 map("v", "<leader>=", ":'<,'>!column -t<CR>")
 map("v", "<leader>s", ":'<,'>sort<CR>")
+
+-- Explorer
+map("n", "<leader>e", function() require("bare.filetree").toggle() end, { desc = "Toggle File Explorer" })
 
 -- Clipboard
 map({ "n", "v" }, "<leader>y", '"+y', { desc = "Yank to Clipboard" })
@@ -18,9 +21,8 @@ map("n", "<C-c>", "<cmd>%y+<cr>", { desc = "Copy File to Clipboard" })
 map("n", "<Tab>", "<cmd>bnext<cr>", opts)
 map("n", "<S-Tab>", "<cmd>bprevious<cr>", opts)
 map("n", "<leader>b", "<cmd>bdelete!<cr>", { desc = "Close Buffer" })
-vim.keymap.set("n", "<leader>z", function()
+map("n", "<leader>z", function()
   local current = vim.api.nvim_get_current_buf()
-
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     if buf ~= current and vim.bo[buf].buflisted then
       vim.api.nvim_buf_delete(buf, { force = true })
@@ -54,9 +56,7 @@ map("v", "c", '"_c', opts)
 -- Find and replace
 map("n", "<leader>fr", function()
   local find = vim.fn.input("Find: ")
-  if find == "" then
-    return
-  end
+  if find == "" then return end
   local replace = vim.fn.input("Replace: ")
   vim.cmd("%s/" .. find .. "/" .. replace .. "/gc")
 end, { desc = "Find & Replace" })
@@ -72,12 +72,13 @@ map("n", "<leader>ws", function() require("bare.lsp").workspace_symbols() end, {
 
 -- Diagnostics & Quickfix Panel
 map("n", "gl", function() require("bare.diagnostics").open_float() end, { desc = "Line Diagnostics" })
-map("n", "<leader>xx", function() require("bare.diagnostics").picker_workspace() end,
-  { desc = "Workspace Diagnostics Picker" })
+map("n", "<leader>xx", function() require("bare.diagnostics").picker_workspace() end, { desc = "Workspace Diagnostics Picker" })
 map("n", "<leader>xX", function() require("bare.diagnostics").picker_buffer() end, { desc = "Buffer Diagnostics Picker" })
 map("n", "<leader>xq", function() require("bare.diagnostics").toggle_qf() end, { desc = "Toggle Quickfix Window" })
 map("n", "<leader>xl", function() require("bare.diagnostics").toggle_loc() end, { desc = "Toggle Location List" })
 map("n", "<leader>xt", function() require("bare.diagnostics").toggle() end, { desc = "Toggle Diagnostics" })
+map("n", "]d", function() require("bare.diagnostics").jump(1) end, { desc = "Next Diagnostic" })
+map("n", "[d", function() require("bare.diagnostics").jump(-1) end, { desc = "Prev Diagnostic" })
 map("n", "]e", function() require("bare.diagnostics").next_error() end, { desc = "Next Error" })
 map("n", "[e", function() require("bare.diagnostics").prev_error() end, { desc = "Prev Error" })
 map("n", "]w", function() require("bare.diagnostics").next_warn() end, { desc = "Next Warning" })

@@ -1,4 +1,3 @@
-vim.opt.wildmenu = true
 vim.opt.wildmode = "noselect:lastused,full"
 vim.opt.wildoptions = "fuzzy,pum,tagfile"
 vim.opt.wildignorecase = true

@@ -93,20 +93,9 @@ end
 function M.setup()
   vim.diagnostic.config({
     virtual_text = true,
-    signs = true,
-    underline = true,
-    update_in_insert = false,
     severity_sort = true,
     float = { border = "rounded" },
   })
-
-  local map = vim.keymap.set
-  map("n", "]d", function() M.jump(1) end, { desc = "Next Diagnostic" })
-  map("n", "[d", function() M.jump(-1) end, { desc = "Prev Diagnostic" })
-  map("n", "]e", M.next_error, { desc = "Next Error" })
-  map("n", "[e", M.prev_error, { desc = "Prev Error" })
-  map("n", "]w", M.next_warn, { desc = "Next Warning" })
-  map("n", "[w", M.prev_warn, { desc = "Prev Warning" })
 end
 
 return M
