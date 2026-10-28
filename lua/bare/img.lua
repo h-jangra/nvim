@@ -52,7 +52,9 @@ function M.delete()
   end
 end
 
-vim.keymap.set("n", "<leader>p", M.paste, { desc = "Paste clipboard image" })
-vim.keymap.set("n", "<leader>d", M.delete, { desc = "Delete image under cursor" })
+function M.setup()
+  vim.keymap.set("n", "<leader>p", M.paste, { desc = "Paste clipboard image" })
+  vim.keymap.set("n", "<leader>d", M.delete, { desc = "Delete image under cursor" })
+end
 
 return M

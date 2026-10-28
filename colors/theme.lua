@@ -1,0 +1,1 @@
+require("themes.nord").setup()

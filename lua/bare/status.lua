@@ -14,32 +14,7 @@ local modes = {
   t = "T"
 }
 
-local colors = {
-  N = "#88C0D0",
-  I = "#ECEFF4",
-  V = "#8FBCBB",
-  R = "#a3be8c",
-  C = "#b48ead",
-  T = "#8FBCBB"
-}
-
-local function setup_hl()
-  local bg = "#3B4252"
-  local h = a.nvim_set_hl
-
-  for name, fg in pairs({
-    StlBase = "#E5E9F0", StlModified = "#a3be8c",
-    StlGitBranch = "#88C0D0", StlLsp = "#8FBCBB",
-    StlDiagErr = "#BF616A", StlDiagWarn = "#EBCB8B",
-    StlDiagInfo = "#88C0D0", StlDiagHint = "#8FBCBB"
-  }) do
-    h(0, name, { fg = fg, bg = bg })
-  end
-
-  for m, fg in pairs(colors) do
-    h(0, "StlMode" .. m, { fg = bg, bg = fg, bold = true })
-  end
-end
+local mode_hl = { N = true, I = true, V = true, R = true, C = true, T = true }
 
 local function git()
   local file = f.expand("%:p")
@@ -96,7 +71,7 @@ end
 function M.statusline()
   local raw = a.nvim_get_mode().mode
   local mode = modes[raw] or "N"
-  local mh = "%#StlMode" .. (colors[mode] and mode or "N") .. "#"
+  local mh = "%#StlMode" .. (mode_hl[mode] and mode or "N") .. "#"
 
   local file = f.expand("%:~:.")
   file = file == "" and "Untitled" or vim.bo.buftype == "terminal" and "Terminal" or file
@@ -119,15 +94,12 @@ function M.statusline()
   return table.concat(left, " ") .. " %#StatusLine# %= " .. (r ~= "" and r .. " %#StlBase#" or "") .. mh .. " %L "
 end
 
-setup_hl()
-
 local g = a.nvim_create_augroup("StlEvents", { clear = true })
 
-a.nvim_create_autocmd("ColorScheme", { group = g, callback = setup_hl })
-
-a.nvim_create_autocmd({ "DiagnosticChanged", "LspAttach", "LspDetach", "RecordingEnter", "RecordingLeave" }, {
-  group = g, callback = function() vim.cmd.redrawstatus() end
-})
+a.nvim_create_autocmd(
+  { "DiagnosticChanged", "LspAttach", "LspDetach", "RecordingEnter", "RecordingLeave", "ColorScheme" },
+  { group = g, callback = function() vim.cmd.redrawstatus() end }
+)
 
 vim.o.statusline = "%!v:lua.require('bare.status').statusline()"
 

@@ -9,6 +9,7 @@ local M = {}
 local uv = vim.uv or vim.loop
 local ns = vim.api.nvim_create_namespace("filetree")
 local MIN_WIDTH = 20
+local render
 
 local state = {
   expanded = {},
@@ -206,7 +207,7 @@ local function refresh_git(cb)
   end)
 end
 
-function render(update_git)
+render = function(update_git)
   local b, w = buf(), win()
   if not b then return end
 
@@ -470,7 +471,9 @@ local function paste()
 
   local function bak_name(target)
     local bak, i = target .. ".bak", 1
-    while uv.fs_stat(bak) do bak = string.format("%s.bak.%d", target, i); i = i + 1 end
+    while uv.fs_stat(bak) do
+      bak = string.format("%s.bak.%d", target, i); i = i + 1
+    end
     return bak
   end
 
@@ -496,9 +499,13 @@ local function paste()
       vim.ui.select({ "Overwrite", "Backup (.bak)", "Skip" }, {
         prompt = string.format("'%s' exists in destination:", name),
       }, function(choice)
-        if choice == "Overwrite" then apply(nil)
-        elseif choice == "Backup (.bak)" then apply(bak_name(target))
-        else process(idx + 1) end
+        if choice == "Overwrite" then
+          apply(nil)
+        elseif choice == "Backup (.bak)" then
+          apply(bak_name(target))
+        else
+          process(idx + 1)
+        end
       end)
     else
       apply(nil)
@@ -609,9 +616,16 @@ end
 
 function M.close()
   sel.anchor, sel.base = nil, nil
+  local b = buf()
   if win() then
     if #vim.api.nvim_list_wins() > 1 then vim.api.nvim_win_close(state.win, true) end
     state.win = nil
+  end
+  -- Free the buffer too, otherwise the hidden "FileTree" buffer keeps its name
+  -- around and a later open fails with E95: Buffer with this name already exists.
+  if b then
+    pcall(vim.api.nvim_buf_delete, b, { force = true })
+    state.buf = nil
   end
 end
 

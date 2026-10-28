@@ -1,12 +1,12 @@
 -- Minimal native Treesitter textobjects and motions for Neovim 0.13+
 --
 -- Textobjects (Visual 'v' & Operators 'd', 'c', 'y'):
--- if / af : Inner / Around Function or Method (vif, vaf, dif, daf, cif, caf, yif, yaf)
--- ic / ac : Inner / Around Class or Struct   (vic, vac, dic, dac, cic, cac, yic, yac)
--- ia / aa : Inner / Around Parameter/Argument(via, vaa, dia, daa, cia, caa, yia, yaa)
--- ii / ai : Inner / Around Conditional       (vii, vai, dii, dai, cii, cai, yii, yai)
--- il / al : Inner / Around Loop (for, while) (vil, val, dil, dal, cil, cal, yil, yal)
--- ib / ab : Inner / Around Block / Body      (vib, vab, dib, dab, cib, cab, yib, yab)
+-- if / af : Inner / Around Function or Method
+-- ic / ac : Inner / Around Class or Struct
+-- ia / aa : Inner / Around Parameter/Argument
+-- ii / ai : Inner / Around Conditional
+-- il / al : Inner / Around Loop (for, while)
+-- ib / ab : Inner / Around Block / Body
 --
 -- Motions:
 -- ]f / [f : Next / Previous Function Start
@@ -62,7 +62,9 @@ local function get_range(node, inner)
   local body = node:field("body")[1] or node:field("consequence")[1]
   if not body then
     for child in node:iter_children() do
-      if match_type(child, "b") then body = child; break end
+      if match_type(child, "b") then
+        body = child; break
+      end
     end
   end
   if not body then return sr, sc, er, ec, er > sr end
@@ -148,12 +150,18 @@ function M.setup()
     vim.keymap.set({ "x", "o" }, "a" .. k, function() M.select(k, false) end, { silent = true, desc = "Around " .. name })
   end
 
-  vim.keymap.set({ "n", "x", "o" }, "]f", function() M.jump("f", true, false) end, { silent = true, desc = "Next function start" })
-  vim.keymap.set({ "n", "x", "o" }, "[f", function() M.jump("f", false, false) end, { silent = true, desc = "Prev function start" })
-  vim.keymap.set({ "n", "x", "o" }, "]F", function() M.jump("f", true, true) end, { silent = true, desc = "Next function end" })
-  vim.keymap.set({ "n", "x", "o" }, "[F", function() M.jump("f", false, true) end, { silent = true, desc = "Prev function end" })
-  vim.keymap.set({ "n", "x", "o" }, "]c", function() M.jump("c", true, false) end, { silent = true, desc = "Next class start" })
-  vim.keymap.set({ "n", "x", "o" }, "[c", function() M.jump("c", false, false) end, { silent = true, desc = "Prev class start" })
+  vim.keymap.set({ "n", "x", "o" }, "]f", function() M.jump("f", true, false) end,
+    { silent = true, desc = "Next function start" })
+  vim.keymap.set({ "n", "x", "o" }, "[f", function() M.jump("f", false, false) end,
+    { silent = true, desc = "Prev function start" })
+  vim.keymap.set({ "n", "x", "o" }, "]F", function() M.jump("f", true, true) end,
+    { silent = true, desc = "Next function end" })
+  vim.keymap.set({ "n", "x", "o" }, "[F", function() M.jump("f", false, true) end,
+    { silent = true, desc = "Prev function end" })
+  vim.keymap.set({ "n", "x", "o" }, "]c", function() M.jump("c", true, false) end,
+    { silent = true, desc = "Next class start" })
+  vim.keymap.set({ "n", "x", "o" }, "[c", function() M.jump("c", false, false) end,
+    { silent = true, desc = "Prev class start" })
 end
 
 return M

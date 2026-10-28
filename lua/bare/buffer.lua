@@ -1,14 +1,5 @@
 local icons = require("bare.icons")
 
-local function setup_highlights()
-  vim.api.nvim_set_hl(0, "WinBar", {})
-  vim.api.nvim_set_hl(0, "WinBarNC", {})
-  vim.api.nvim_set_hl(0, "WinBarActive", { fg = "#2E3440", bg = "#88C0D0", bold = true, })
-  vim.api.nvim_set_hl(0, "WinBarInactive", { fg = "#81A1C1", bg = "#434C5E", })
-end
-setup_highlights()
-vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_highlights })
-
 _G.goto_buf = function(minwid) vim.api.nvim_set_current_buf(minwid) end
 
 local function get_valid_bufs()

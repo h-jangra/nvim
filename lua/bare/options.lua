@@ -4,12 +4,13 @@ opt.laststatus = 3
 opt.mouse = "a"
 opt.number = true
 opt.relativenumber = true
+opt.scrolloffpad = 8
 opt.scrolloff = 8
 opt.showtabline = 0
 opt.signcolumn = "yes:1"
 opt.termguicolors = true
 
-opt.shortmess:append("IcFsW")
+-- opt.shortmess:append("IcFsWu")
 opt.autocomplete = true
 opt.complete = { ".", "w" }
 opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" }

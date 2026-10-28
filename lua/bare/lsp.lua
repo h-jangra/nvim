@@ -1,24 +1,3 @@
-local M = {}
-
-local ft_formatter = {
-  html = "html",
-  css = "cssls",
-  scss = "cssls",
-  less = "cssls",
-  javascript = "tsls",
-  javascriptreact = "tsls",
-  typescript = "tsls",
-  typescriptreact = "tsls",
-}
-
-local organise_imports_client = {
-  javascript = "tsls",
-  javascriptreact = "tsls",
-  typescript = "tsls",
-  typescriptreact = "tsls",
-  java = "jdtls",
-}
-
 local servers = {
   luals = {
     cmd = { "lua-language-server" },
@@ -80,7 +59,7 @@ local servers = {
   taplo = { cmd = { "taplo", "lsp", "stdio" }, ft = { "toml" } },
   bash_ls = { cmd = { "bash-language-server", "start" }, ft = { "bash", "sh" } },
   ansiblels = { cmd = { "ansible-language-server", "--stdio" }, ft = { "yaml", "yml" } },
-  tinymist = { cmd = { "tinymist", "lsp" }, ft = { "typst" }, },
+  tinymist = { cmd = { "tinymist", "lsp" }, ft = { "typst" } },
   jdtls = {
     cmd = { "jdtls" },
     ft = { "java" },
@@ -101,37 +80,17 @@ local servers = {
   nimls = { cmd = { "nimlangserver" }, ft = { "nim", "nimble" } },
   yml = { cmd = { "yaml-language-server", "--stdio" }, ft = { "yaml", "yml" } },
   kotlin = { cmd = { "kotlin-lsp" }, ft = { "kotlin" } },
+  zls = { cmd = { "zls" }, ft = { "zig" } },
 }
-
-local function on_attach(client, bufnr)
-  if client:supports_method("textDocument/inlayHint") and vim.lsp.inlay_hint then
-    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-  end
-  local map = function(m, l, r, desc)
-    vim.keymap.set(m, l, r, { buffer = bufnr, silent = true, desc = desc })
-  end
-  map({ "n", "i" }, "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
-end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem = {
-  snippetSupport = true,
-  commitCharactersSupport = true,
-  deprecatedSupport = true,
-  preselectSupport = true,
-  insertReplaceSupport = true,
-  insertTextModeSupport = { valueSet = { 1, 2 } },
-  resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } },
-}
-capabilities.textDocument.foldingRange = {
-  dynamicRegistration = false,
-  lineFoldingOnly = true,
-}
 
 local root_markers = {
   ".git", "pom.xml", "build.gradle", "mvnw", "gradlew", "package.json", "Cargo.toml",
   "go.mod", "pyproject.toml", "setup.py", "requirements.txt", ".venv", ".luarc.json", "stylua.toml",
 }
+
+vim.lsp.inlay_hint.enable(true)
 
 for name, cfg in pairs(servers) do
   if vim.fn.executable(cfg.cmd[1]) == 1 then
@@ -146,72 +105,3 @@ for name, cfg in pairs(servers) do
     vim.lsp.enable(name)
   end
 end
-
-local function organize_imports(buf, name)
-  local client = name and vim.lsp.get_clients({ bufnr = buf, name = name })[1]
-  if not client then return end
-
-  local results = vim.lsp.buf_request_sync(buf, "textDocument/codeAction", {
-    textDocument = vim.lsp.util.make_text_document_params(buf),
-    context = { only = { "source.organizeImports" } },
-  }, 1000)
-
-  for _, result in pairs(results or {}) do
-    for _, action in ipairs(result.result or {}) do
-      if action.edit then
-        vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-      end
-      if action.command then
-        client:exec_cmd(action.command, { bufnr = buf })
-      end
-    end
-  end
-end
-
-local group = vim.api.nvim_create_augroup("LspConfig", { clear = true })
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = group,
-  callback = function(args)
-    local buf = args.buf
-    local ft = vim.bo[buf].filetype
-
-    organize_imports(buf, organise_imports_client[ft])
-    vim.lsp.buf.format({
-      bufnr = buf,
-      filter = function(cl)
-        return not ft_formatter[ft] or cl.name == ft_formatter[ft]
-      end,
-    })
-  end,
-})
-
-function M.document_symbols()
-  vim.lsp.buf_request(0, "textDocument/documentSymbol", {
-    textDocument = vim.lsp.util.make_text_document_params(),
-  }, function(_, result)
-    if not result or #result == 0 then
-      return vim.notify("No document symbols", vim.log.levels.INFO)
-    end
-
-    vim.lsp.buf.document_symbol()
-  end)
-end
-
-function M.workspace_symbols()
-  vim.ui.input({ prompt = "Symbol: " }, function(query)
-    if not query or query == "" then
-      return
-    end
-
-    vim.lsp.buf_request(0, "workspace/symbol", { query = query }, function(_, result)
-      if not result or #result == 0 then
-        return vim.notify("No workspace symbols", vim.log.levels.INFO)
-      end
-
-      vim.lsp.buf.workspace_symbol(query)
-    end)
-  end)
-end
-
-return M

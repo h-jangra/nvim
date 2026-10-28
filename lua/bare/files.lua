@@ -77,15 +77,6 @@ local function confirm_unsaved(action)
   return false
 end
 
-local function setup_hl()
-  if git.set_hl then
-    git.set_hl()
-  end
-  api.nvim_set_hl(0, "BareFilesDir", { default = true, link = "Directory" })
-  api.nvim_set_hl(0, "BareFilesFile", { default = true, link = "Normal" })
-  api.nvim_set_hl(0, "BareFilesHidden", { default = true, link = "Comment" })
-end
-
 local function get_file_icon(name, is_dir)
   if is_dir then
     return " ", "Directory"
@@ -779,7 +770,6 @@ function M.setup_buffer_keymaps(buf)
 end
 
 function M.open(dir)
-  setup_hl()
   dir = dir and fs.normalize(fn.fnamemodify(dir, ":p")) or nil
   if not dir or dir == "" then
     local cur_file = api.nvim_buf_get_name(0)
@@ -831,7 +821,6 @@ function M.setup(opts)
   if opts then
     config = vim.tbl_deep_extend("force", config, opts)
   end
-  setup_hl()
   local grp = api.nvim_create_augroup("BareFiles", { clear = true })
 
   api.nvim_create_autocmd("WinEnter", {
@@ -878,7 +867,6 @@ function M.setup(opts)
     end,
   })
 
-  api.nvim_create_autocmd("ColorScheme", { group = grp, callback = setup_hl })
   vim.api.nvim_create_user_command("Files", require("bare.files").toggle, {})
 end
 

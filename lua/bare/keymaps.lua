@@ -6,8 +6,32 @@ map("n", "<C-s>", "<cmd>silent write<cr>", opts)
 map("n", "<leader>o", "<cmd>silent update<cr>:source %<cr>", { desc = "Save & Reload" })
 map("n", "<A-q>", "<cmd>qall!<cr>", opts)
 map("n", "<leader>a", "ggVG", { desc = "Select All" })
-map("v", "<leader>=", ":'<,'>!column -t<CR>")
 map("v", "<leader>s", ":'<,'>sort<CR>")
+
+map("x", "<leader>=", function()
+  local a, b = vim.fn.getpos("v")[2], vim.fn.line(".")
+  local first, last = math.min(a, b), math.max(a, b)
+  local sep = vim.fn.input("Delimiter: ")
+  if sep == "" then return end
+
+  local rows, widths = {}, {}
+  for i, line in ipairs(vim.api.nvim_buf_get_lines(0, first - 1, last, false)) do
+    rows[i] = vim.split(line, sep, { plain = true })
+    for j, cell in ipairs(rows[i]) do
+      rows[i][j] = vim.trim(cell)
+      widths[j] = math.max(widths[j] or 0, #rows[i][j])
+    end
+  end
+
+  for i, row in ipairs(rows) do
+    for j, cell in ipairs(row) do
+      row[j] = cell .. string.rep(" ", widths[j] - #cell)
+    end
+    rows[i] = table.concat(row, " " .. sep .. " "):gsub("%s+$", "")
+  end
+
+  vim.api.nvim_buf_set_lines(0, first - 1, last, false, rows)
+end, { desc = "Align Columns" })
 
 -- Explorer
 map("n", "<leader>e", function() require("bare.filetree").toggle() end, { desc = "Toggle File Explorer" })
@@ -62,27 +86,47 @@ map("n", "<leader>fr", function()
 end, { desc = "Find & Replace" })
 
 -- Copy diagnostics to clipboard
-map("n", "<leader>cd", function() require("bare.diagnostics").copy_line() end, { desc = "Copy Line Diagnostics" })
+map("n", "<leader>cd", function()
+  local diags = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
+  if #diags > 0 then
+    vim.fn.setreg("+", table.concat(vim.tbl_map(function(d) return d.message end, diags), "\n"))
+  end
+end, { desc = "Copy Line Diagnostics" })
 
 -- LSP
+map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+map("n", "<leader>th", function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+end, { desc = "Toggle Inlay Hints" })
 map("n", "<leader>lf", function() vim.lsp.buf.format({ async = true, timeout_ms = 2000 }) end, { desc = "LSP Format" })
 map("n", "<leader>li", "gg=G``", { desc = "Indent Entire File" })
-map("n", "<leader>ds", function() require("bare.lsp").document_symbols() end, { desc = "Document Symbols" })
-map("n", "<leader>ws", function() require("bare.lsp").workspace_symbols() end, { desc = "Workspace Symbols" })
+map("n", "<leader>ds", vim.lsp.buf.document_symbol, { desc = "Document Symbols" })
+map("n", "<leader>ws", function()
+  vim.ui.input({ prompt = "Workspace Symbol: " }, function(query)
+    if query and query ~= "" then
+      vim.lsp.buf.workspace_symbol(query)
+    end
+  end)
+end, { desc = "Workspace Symbols" })
 
 -- Diagnostics & Quickfix Panel
-map("n", "gl", function() require("bare.diagnostics").open_float() end, { desc = "Line Diagnostics" })
-map("n", "<leader>xx", function() require("bare.diagnostics").picker_workspace() end, { desc = "Workspace Diagnostics Picker" })
-map("n", "<leader>xX", function() require("bare.diagnostics").picker_buffer() end, { desc = "Buffer Diagnostics Picker" })
-map("n", "<leader>xq", function() require("bare.diagnostics").toggle_qf() end, { desc = "Toggle Quickfix Window" })
-map("n", "<leader>xl", function() require("bare.diagnostics").toggle_loc() end, { desc = "Toggle Location List" })
-map("n", "<leader>xt", function() require("bare.diagnostics").toggle() end, { desc = "Toggle Diagnostics" })
-map("n", "]d", function() require("bare.diagnostics").jump(1) end, { desc = "Next Diagnostic" })
-map("n", "[d", function() require("bare.diagnostics").jump(-1) end, { desc = "Prev Diagnostic" })
-map("n", "]e", function() require("bare.diagnostics").next_error() end, { desc = "Next Error" })
-map("n", "[e", function() require("bare.diagnostics").prev_error() end, { desc = "Prev Error" })
-map("n", "]w", function() require("bare.diagnostics").next_warn() end, { desc = "Next Warning" })
-map("n", "[w", function() require("bare.diagnostics").prev_warn() end, { desc = "Prev Warning" })
+map("n", "gl", function() vim.diagnostic.open_float({ border = "rounded" }) end, { desc = "Line Diagnostics" })
+map("n", "<leader>xx", vim.diagnostic.setqflist, { desc = "Workspace Diagnostics" })
+map("n", "<leader>xX", function()
+  vim.fn.setqflist(vim.diagnostic.toqflist(vim.diagnostic.get(0)), "r")
+  vim.cmd("copen")
+end, { desc = "Buffer Diagnostics" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next Diagnostic" })
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Prev Diagnostic" })
+map("n", "]e", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end,
+  { desc = "Next Error" })
+map("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end,
+  { desc = "Prev Error" })
+map("n", "]w", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.WARN }) end,
+  { desc = "Next Warning" })
+map("n", "[w", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN }) end,
+  { desc = "Prev Warning" })
 
 -- Git (navigation, preview, revert)
 map("n", "]h", function() require("bare.git").next_hunk() end, { desc = "Next Git Hunk" })
@@ -93,9 +137,7 @@ map("n", "<leader>gR", function() require("bare.git").revert_file() end, { desc 
 
 map("n", "<leader>n", function() require("bare.notify").show_history() end, { desc = "Show Notification History" })
 
-map("n", "<leader>fc", function()
-  vim.cmd("edit " .. vim.fn.stdpath("config") .. "/init.lua")
-end, { desc = "Edit Config" })
+map("n", "<leader>fc", "<cmd>edit " .. vim.fn.stdpath("config") .. "/init.lua<cr>", { desc = "Edit Config" })
 
 map("i", { "jk", "kj" }, "<Esc>", opts)
 map("i", "<C-s>", "<Esc><cmd>silent write<cr>", opts)
