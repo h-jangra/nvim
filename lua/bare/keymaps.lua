@@ -139,5 +139,6 @@ map("n", "<leader>n", function() require("bare.notify").show_history() end, { de
 
 map("n", "<leader>fc", "<cmd>edit " .. vim.fn.stdpath("config") .. "/init.lua<cr>", { desc = "Edit Config" })
 
-map("i", { "jk", "kj" }, "<Esc>", opts)
+map("i", "kj", "<Esc>", opts)
+map("i", "jk", "<Esc>", opts)
 map("i", "<C-s>", "<Esc><cmd>silent write<cr>", opts)

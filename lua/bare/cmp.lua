@@ -1,5 +1,8 @@
 vim.opt.pumheight = 10
 vim.opt.pumborder = "rounded"
+vim.opt.winborder = "rounded"
+vim.opt.completeopt = { "menu", "menuone", "noselect", "popup", "nosort" }
+vim.opt.complete = "o,.,w,b"
 
 local icons = {
   Text = "󰉿",
@@ -34,6 +37,7 @@ local function format(item)
   return {
     abbr = (icons[kinds[item.kind]] or "") .. " " .. item.label,
     kind = kinds[item.kind],
+    sortText = "0" .. (item.sortText or item.label),
   }
 end
 
@@ -56,11 +60,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 vim.keymap.set("i", "<C-Space>", function()
-  if vim.fn.pumvisible() == 1 then return "<C-n>" end
-  if vim.lsp.get_clients({ bufnr = 0, method = "textDocument/completion" })[1] then
-    vim.lsp.completion.get()
-    return ""
-  end
   return "<C-n>"
 end, { expr = true })
 

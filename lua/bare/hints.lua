@@ -196,8 +196,8 @@ local function render(query, maps)
   for i, it in ipairs(clues) do
     local line = string.format(" %-" .. max_k .. "s  %s", it.key, it.desc)
     table.insert(lines, line)
-    table.insert(hls, { i - 1, 1, 1 + #it.key, "Special" })
-    table.insert(hls, { i - 1, 1 + max_k + 2, #line, it.is_group and "Directory" or "Normal" })
+    table.insert(hls, { i - 1, 1, 1 + #it.key, "DiagnosticWarn" })
+    table.insert(hls, { i - 1, 1 + max_k + 2, #line, it.is_group and "String" or "Normal" })
   end
 
   local width = 0
@@ -215,7 +215,7 @@ local function render(query, maps)
     height = height,
     row = math.max(1, vim.o.lines - height - 3),
     col = math.max(1, vim.o.columns - width - 2),
-    title = string.format(" %s ", format_title(query)),
+    title = { { string.format(" %s ", format_title(query)), "PmenuSel" } },
     enter = false,
     focusable = false,
   })

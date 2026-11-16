@@ -1,8 +1,13 @@
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
-    vim.hl.hl_op({ higroup = "Visual", timeout = 150 })
+    vim.hl.on_yank({ higroup = "Visual", timeout = 150 })
   end,
 })
+
+-- Copy relative path
+vim.keymap.set('n', '<leader>cf', function()
+  vim.fn.setreg('+', vim.fn.expand('%:p'))
+end, { desc = "Copy absolute file path" })
 
 local lsp_format_group = vim.api.nvim_create_augroup("LspFormatOnSave", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", {

@@ -1,6 +1,6 @@
 -- Keymaps:
 -- <CR>/l: open | h: back | -: parent | C: enter dir
--- j/k: move | H: hidden | q: close | a/A: create
+-- j/k: move | J/K: multiselect | H: hidden | q: close | a/A: create
 -- d: delete | r: rename | u: undo | R: refresh
 -- m: mark | M: clear | y: copy | x: cut | p: paste
 -- </Esc>: cancel | </>: resize
@@ -373,6 +373,15 @@ local function toggle_file()
   render(false)
 end
 
+local function select_move(dir)
+  local it = item()
+  if it then state.selected[it.path] = true end
+  move_cursor(dir)
+  local it2 = item()
+  if it2 then state.selected[it2.path] = true end
+  render(false)
+end
+
 local function copy_recursive(src, dest)
   vim.fn.mkdir(vim.fs.dirname(dest), "p")
   local stat = uv.fs_stat(src)
@@ -564,8 +573,10 @@ local function setup_buffer()
     end },
     { { "j", "<Down>" }, function() move_cursor(1) end },
     { { "k", "<Up>" },   function() move_cursor(-1) end },
-    { "<S-Down>",        function() move_cursor(1, true) end },
-    { "<S-Up>",          function() move_cursor(-1, true) end },
+    { "J", function() select_move(1) end },
+    { "K", function() select_move(-1) end },
+    { "<S-Down>", function() move_cursor(1, true) end },
+    { "<S-Up>",   function() move_cursor(-1, true) end },
     { "H", function()
       state.show_hidden = not state.show_hidden; render(true)
     end },
