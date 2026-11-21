@@ -1,6 +1,4 @@
 vim.opt.pumheight = 10
-vim.opt.pumborder = "rounded"
-vim.opt.winborder = "rounded"
 vim.opt.completeopt = { "menu", "menuone", "noselect", "popup", "nosort" }
 vim.opt.complete = "o,.,w,b"
 

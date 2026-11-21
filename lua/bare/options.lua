@@ -14,8 +14,8 @@ opt.termguicolors = true
 opt.autocomplete = true
 opt.complete = { ".", "w" }
 opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" }
-opt.winborder = "rounded"
-opt.pumborder = "rounded"
+opt.winborder = "single"
+opt.pumborder = "single"
 
 vim.o.foldenable = false
 vim.o.foldlevel = 99

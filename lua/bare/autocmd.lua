@@ -4,6 +4,26 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
+vim.keymap.set("n", "gf", function()
+  local line = vim.api.nvim_get_current_line()
+  local candidates = {}
+  for m in line:gmatch("require[%s%(]+['\"]([%w%.%_%-]+)['\"]") do
+    local p = m:gsub("%.", "/")
+    candidates[#candidates + 1] = vim.api.nvim_get_runtime_file("lua/" .. p .. ".lua", false)[1]
+    candidates[#candidates + 1] = vim.api.nvim_get_runtime_file("lua/" .. p .. "/init.lua", false)[1]
+  end
+  for m in line:gmatch("[~%w_./%-%+]+") do
+    candidates[#candidates + 1] = m
+  end
+  for _, p in ipairs(candidates) do
+    if p and p ~= "" then
+      p = vim.fn.expand((p:gsub("^['\"]", ""):gsub("['\"),;:]+$", "")))
+      local f = vim.fn.filereadable(p) == 1 and p or vim.fn.findfile(p)
+      if f ~= "" then return vim.cmd.edit(vim.fn.fnameescape(f)) end
+    end
+  end
+end, { desc = "Go to file" })
+
 -- Copy relative path
 vim.keymap.set('n', '<leader>cf', function()
   vim.fn.setreg('+', vim.fn.expand('%:p'))
