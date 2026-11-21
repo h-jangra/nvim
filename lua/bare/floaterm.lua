@@ -1,7 +1,7 @@
 local ui = require("bare.ui")
 
 local M = {
-  config = { width = 0.9, height = 0.9, border = "rounded" },
+  config = { width = 0.6, height = 0.6, border = "single" },
   state = { win = nil, buf = nil },
 }
 

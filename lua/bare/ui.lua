@@ -26,8 +26,12 @@ function M.float(opts)
   local cfg = {
     relative = opts.relative or "editor",
     style = opts.style or "minimal",
-    border = opts.border or "bold",
-    title = opts.title,
+    border = opts.border or "single",
+    title = opts.title and (
+      type(opts.title) == "string"
+      and { { opts.title, "PmenuSel" } }
+      or opts.title
+    ) or nil,
     title_pos = opts.title and (opts.title_pos or "center") or nil,
     width = width,
     height = height,
